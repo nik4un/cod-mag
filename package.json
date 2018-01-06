@@ -1,0 +1,14 @@
+{
+  "name": "cod-mag",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Учебный проект",
+  "author": "Nik4un",
+  "scripts": {
+    "server": "browser-sync start --server --files \"css/*.css, js/*.js, *.html\""
+  },
+  "author": "Николай",
+  "license": "MIT",
+  "devDependencies": {
+  }
+}
