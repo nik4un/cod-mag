@@ -3,12 +3,14 @@
   "version": "0.0.1",
   "private": true,
   "description": "Учебный проект",
-  "author": "Nik4un",
+  "author": "Николай",
   "scripts": {
     "server": "browser-sync start --server --files \"css/*.css, js/*.js, *.html\""
   },
-  "author": "Николай",
   "license": "MIT",
-  "devDependencies": {
+  "devDependencies": {},
+  "dependencies": {
+    "eslint": "^4.14.0",
+    "eslint-config-htmlacademy": "^0.3.2"
   }
 }
