@@ -15,10 +15,10 @@ var NUMBER_OF_WISARDS = 4;
 
 // получение мссива  из  num случайных элементов массива arr
 var getRandomFromArray = function (arr, num) {
-  num = num || 4;
+  num = num || NUMBER_OF_WISARDS;
   var resultElements = [];
   for (var i = 0; i < num; i += 1) {
-    resultElements[i] = arr.splice((Math.floor(Math.random() * arr.length)), 1);
+    resultElements[i] = arr.splice((Math.floor(Math.random() * arr.length)), 1)[0];
   }
   return resultElements;
 };
@@ -42,7 +42,7 @@ var wizards = (function (num) {
 }
 )(NUMBER_OF_WISARDS);
 
-//  создание волшебника из шаблона
+//  создание волшебника из шаблон
 var uesrDialog = document.querySelector('.setup');
 var similarListElement = uesrDialog.querySelector('.setup-similar-list');
 var similarWizardTemplate = document.querySelector('#similar-wizard-template').content.querySelector('.setup-similar-item');
