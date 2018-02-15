@@ -1,300 +1,182 @@
 'use strict';
 
-//  список доступных имен
-var WIZARD_NAMES = [
-  'Иван',
-  'Хуан Себастьян',
-  'Мария',
-  'Кристоф',
-  'Виктор',
-  'Юлия',
-  'Люпита',
-  'Вашингтон'
-];
-//  список доступных фамилий
-var WIZARD_SURNAMES = [
-  'да Марья',
-  'Верон',
-  'Мирабелла',
-  'Вальц',
-  'Онопко',
-  'Топольницкая',
-  'Нионго',
-  'Ирвинг'
-];
-//  список доступных цветов мантии
-var COAT_COLORS = [
-  'rgb(101, 137, 164)',
-  'rgb(241, 43, 107)',
-  'rgb(146, 100, 161)',
-  'rgb(56, 159, 117)',
-  'rgb(215, 210, 55)',
-  'rgb(0, 0, 0)'
-];
-//  список доступных цветов глаз
-var EYES_COLORS = ['black', 'red', 'blue', 'yellow', 'green'];
-//  список доступных цветов файербола
-var FIREBALL_COLORS = ['#ee4830', '#30a8ee', '#5ce6c0', '#e848d5', '#e6e848'];
-//  количество волшебников в списке
-var NUMBER_OF_WISARDS = 4;
-//  клавиатурные коды
-var ESC_KEYCODE = 27;
-var ENTER_KEYCODE = 13;
-//  сообщения на валидность
-var MESSAGE_TOOSHORT_RU = 'Имя должно состоять как минимум из 2-х символов';
-var MESSAGE_MISSING_RU = 'Поле должно быть заполнено';
+//  параметры волшебника начальные
+var wizardInitial = {
+  name: window.elements.wizardNameInput.value,
+  eyesColor: window.elements.wizardEyesInput.value,
+  coatColor: window.elements.wizardCoatInput.value,
+  fireballColor: window.elements.wizardFireballInput.value
+};
 
-/**
- * получение мссива из  "num" случайных элементов массива "arr"
- * @param  {Array} arr исходный массив
- * @param  {number} num количество элементов результирующего массива (<= arr.length)
- * @return {Array}     массив из случайных элементов исходного массива
- */
-var getRandomFromArray = function (arr, num) {
-  num = num || NUMBER_OF_WISARDS;
-  var inetrArr = Array.from(arr);
-  var resultElements = [];
-  for (var i = 0; i < num; i += 1) {
-    resultElements[i] = inetrArr.splice(Math.floor(Math.random() * inetrArr.length), 1)[0];
-  }
-  return resultElements;
+//  параметры волшебника текущие
+var wizardCurrent = {
+  name: window.elements.wizardNameInput,
+  eyesColor: window.elements.wizardEyesInput.value,
+  coatColor: window.elements.wizardCoatInput.value,
+  fireballColor: window.elements.wizardFireballInput.value
 };
 
 /**
- * Генерация массива волшебников с произвольными параметрами
- * @return [{name: string, coatColor: string, eyesColor: string}, ...]
- *         массив волшебников со случайным именем и цветом глаз и пальто
+ * определяет значение следующее по порядку за element из списа colorSource
+ * @param  {any} element   исходное значение
+ * @param  {array} source  список доступных значений
+ * @return {any}           значение, следующее по порядку в списке за element
  */
-var wizards = (function (num) {
-  var resultElements = [];
-  var names = getRandomFromArray(WIZARD_NAMES, num);
-  var surnames = getRandomFromArray(WIZARD_SURNAMES, num);
-  var coatColors = getRandomFromArray(COAT_COLORS, num);
-  var eyesColors = getRandomFromArray(EYES_COLORS, num);
-  for (var i = 0; i < num; i += 1) {
-    resultElements[i] = {
-      name: names[i],
-      surname: surnames[i],
-      coatColor: coatColors[i],
-      eyesColor: eyesColors[i]
-    };
-  }
-  return resultElements;
-})(NUMBER_OF_WISARDS);
-
-var wizardSetupMenu = document.querySelector('.setup');
-var similarListElement = wizardSetupMenu.querySelector('.setup-similar-list');
-var similarWizardTemplate = document
-    .querySelector('#similar-wizard-template')
-    .content.querySelector('.setup-similar-item');
-//  создание фрагмента для заполнения похожими волшебниками
-var fragment = document.createDocumentFragment();
-
-//  создание элементов в списке волшебников
-(function (items) {
-  for (var i = 0; i < items; i += 1) {
-    var wizardElement = similarWizardTemplate.cloneNode(true);
-    wizardElement.querySelector('.setup-similar-label').textContent =
-      wizards[i].name + ' ' + wizards[i].surname;
-    wizardElement.querySelector('.wizard-coat').style.fill =
-      wizards[i].coatColor;
-    wizardElement.querySelector('.wizard-eyes').style.fill =
-      wizards[i].eyesColor;
-    fragment.appendChild(wizardElement);
-  }
-})(NUMBER_OF_WISARDS);
-
-var wizardSetupOpen = document.querySelector('.setup-open');
-var wizardSetupClose = document.querySelector('.setup-close');
-var wizardSetupSave = wizardSetupMenu.querySelector('.setup-submit');
-var wizardNameInput = wizardSetupMenu.querySelector('.setup-user-name');
-var wizardSetup = wizardSetupMenu.querySelector('.setup-player');
-var wizardCoat = wizardSetup.querySelector('.wizard-coat');
-var wizardEyes = wizardSetup.querySelector('.wizard-eyes');
-var wizardFireball = document.querySelector('.setup-fireball-wrap');
-var wizardCoatInput = document.querySelector('input[name="coat-color"]');
-var wizardEyesInput = document.querySelector('input[name="eyes-color"]');
-var wizardFireballInput = wizardFireball.querySelector(
-    'input[name="fireball-color"]'
-);
-//  параметры волшебника начальные и текущие
-var wizardInit = {
-  eyesColor: wizardEyesInput.value,
-  coatColor: wizardCoatInput.value,
-  fireballColor: wizardFireballInput.value
-};
-
-/**
- * устанавливает/удаляет отслеживание событий
- * @param  {obj}    element           элемент, на который устанавливается событие
- * @param  {string} action            может быть "add" или "remove"
- * @param  {Array}  eventHandlerPairs массив списков из двух значений [событие, обработчик]
- */
-var setEventsListener = function (element, action, eventHandlerPairs) {
-  if (action === 'add') {
-    eventHandlerPairs.forEach(function (item) {
-      element.addEventListener(item[0], item[1]);
-    });
-  }
-  if (action === 'remove') {
-    eventHandlerPairs.forEach(function (item) {
-      element.removeEventListener(item[0], item[1]);
-    });
-  }
-};
-
-//  получение обработчика для клика на элементе
-var getClickHandler = function (method) {
-  return function () {
-    method();
-  };
-};
-
-//  получение обработчика для нажатой кнопки
-var getKeydownHandler = function (keyCode, method) {
-  //   var condition = document.activeElement.className !== 'setup-user-name';
-  return function (evt) {
-    if (evt.keyCode === keyCode) {
-      method();
-    }
-  };
+var changeElementOnNext = function (element, source) {
+  var index = source.indexOf(element);
+  index = index < source.length - 1 ? index + 1 : 0;
+  return source[index];
 };
 
 //  обработчик для ввода имени в поле ввода
-var onInput = function (evt) {
-  setEventsListener(wizardSetupSave, 'remove', [
-    ['click', onSetupSaveClick],
-    ['keydown', onSetupSavePressEnter]
-  ]);
+var onInputName = function (evt) {
+  window.elements.wizardSetupSave.removeEventListener('click', onSetupSaveClick);
+  window.elements.wizardSetupSave.removeEventListener('keydown', onSetupSavePressEnter);
+
   if (evt.target.value.length === 0) {
-    evt.target.setCustomValidity(MESSAGE_MISSING_RU);
+    evt.target.setCustomValidity(window.settings.MESSAGE.MISSING_RU);
   } else if (evt.target.value.length < 2) {
-    evt.target.setCustomValidity(MESSAGE_TOOSHORT_RU);
+    evt.target.setCustomValidity(window.settings.MESSAGE.TOOSHORT_RU);
   } else {
     evt.target.setCustomValidity('');
-    setEventsListener(wizardSetupSave, 'add', [
-      ['click', onSetupSaveClick],
-      ['keydown', onSetupSavePressEnter]
-    ]);
+    window.elements.wizardSetupSave.addEventListener('click', onSetupSaveClick);
+    window.elements.wizardSetupSave.addEventListener('keydown', onSetupSavePressEnter);
   }
 };
 
-/**
- * изменение element на следующий по порядку из colorSource
- * @param  {String} element     исходный цвет
- * @param  {Array} colorSource  список доступных цветов
- * @return {String}             цвет следующий по порядку в списке за element
- */
-var changeColor = function (element, colorSource) {
-  var index = colorSource.indexOf(element);
-  index = index < colorSource.length - 1 ? index + 1 : 0;
-  return colorSource[index];
+//  обработчик для клика на глаза: изменение цвета глаз
+var onEyesClick = function () {
+  wizardCurrent.eyesColor = changeElementOnNext(wizardCurrent.eyesColor, window.settings.EYES_COLORS);
+  window.elements.wizardEyesInput.value = wizardCurrent.eyesColor;
+  window.elements.wizardEyes.style.fill = wizardCurrent.eyesColor;
 };
 
-//  обработчик для изменения цвета глаз
-var changeEyesColor = function () {
-  wizardInit.eyesColor = changeColor(wizardInit.eyesColor, EYES_COLORS);
-  wizardEyesInput.value = wizardInit.eyesColor;
-  wizardEyes.style.fill = wizardInit.eyesColor;
+//  обработчик для клика на пальто: изменение цвета пальто
+var onCoatClick = function () {
+  wizardCurrent.coatColor = changeElementOnNext(wizardCurrent.coatColor, window.settings.COAT_COLORS);
+  window.elements.wizardCoatInput.value = wizardCurrent.coatColor;
+  window.elements.wizardCoat.style.fill = wizardCurrent.coatColor;
 };
 
-//  обработчик для изменения цвета пальто
-var changeCoatColor = function () {
-  wizardInit.coatColor = changeColor(wizardInit.coatColor, COAT_COLORS);
-  wizardCoatInput.value = wizardInit.coatColor;
-  wizardCoat.style.fill = wizardInit.coatColor;
-};
-
-//  обработчик для изменения цвета файербола
-var changeFireballColor = function () {
-  wizardInit.fireballColor = changeColor(
-      wizardInit.fireballColor,
-      FIREBALL_COLORS
+//  обработчик для клика на файербол: изменение цвета файербола
+var onFireballClick = function () {
+  wizardCurrent.fireballColor = changeElementOnNext(
+      wizardCurrent.fireballColor,
+      window.settings.FIREBALL_COLORS
   );
-  wizardFireballInput.value = wizardInit.fireballColor;
-  wizardFireball.style.backgroundColor = wizardInit.fireballColor;
+  window.elements.wizardFireballInput.value = wizardCurrent.fireballColor;
+  window.elements.wizardFireball.style.backgroundColor = wizardCurrent.fireballColor;
 };
 
-//  открытие меню настроек
-var openPopup = function () {
-  wizardSetupMenu.classList.remove('hidden');
-  wizardSetupMenu.querySelector('.setup-similar').classList.remove('hidden');
-
-  setEventsListener(document, 'add', [['keydown', onPopupPressEsc]]);
-  setEventsListener(wizardSetupClose, 'add', [
-    ['click', onPopupEscClic],
-    ['keydown', onPopupEscPressEnter]
-  ]);
-  setEventsListener(wizardSetupSave, 'add', [
-    ['click', onSetupSaveClick],
-    ['keydown', onSetupSavePressEnter]
-  ]);
-  setEventsListener(wizardNameInput, 'add', [
-    ['input', onInput],
-    [
-      'focus',
-      function () {
-        document.removeEventListener('keydown', onPopupPressEsc);
-      }
-    ],
-    [
-      'blur',
-      function () {
-        document.addEventListener('keydown', onPopupPressEsc);
-      }
-    ]
-  ]);
-  setEventsListener(wizardEyes, 'add', [['click', onEyesClick]]);
-  setEventsListener(wizardCoat, 'add', [['click', onCoatClick]]);
-  setEventsListener(wizardFireball, 'add', [['click', onFireballClick]]);
+//  обработчик для клика на кнопку «Сохранить» меню настроек
+var onSetupSaveClick = function () {
+  wizardInitial.name = window.elements.wizardNameInput.value;
+  window.elements.wizardNameInput.setAttribute('value', wizardInitial.name);
+  wizardInitial.eyesColor = window.elements.wizardEyesInput.value;
+  wizardInitial.coatColor = window.elements.wizardCoatInput.value;
+  wizardInitial.fireballColor = window.elements.wizardFireballInput.value;
+  closeSetupMenu();
 };
 
-//  закрытие меню настроек
-var closePopup = function () {
-  wizardSetupMenu.classList.add('hidden');
-
-  setEventsListener(document, 'remove', [['keydown', onPopupPressEsc]]);
-  setEventsListener(wizardSetupClose, 'remove', [
-    ['click', onPopupEscClic],
-    ['keydown', onPopupEscPressEnter]
-  ]);
-  setEventsListener(wizardSetupSave, 'remove', [
-    ['click', onSetupSaveClick],
-    ['keydown', onSetupSavePressEnter]
-  ]);
-  setEventsListener(wizardNameInput, 'remove', [
-    ['input', onInput],
-    ['focus', function () {
-      document.removeEventListener('keydown', onPopupPressEsc);
-    }
-    ],
-    ['blur', function () {
-      document.addEventListener('keydown', onPopupPressEsc);
-    }
-    ]
-  ]);
-  setEventsListener(wizardEyes, 'remove', [['click', onEyesClick]]);
-  setEventsListener(wizardCoat, 'remove', [['click', onCoatClick]]);
-  setEventsListener(wizardFireball, 'remove', [['click', onFireballClick]]);
+var onSetupSavePressEnter = function (evt) {
+  if (evt.keyCode === window.settings.KEY_CODE.ENTER) {
+    onSetupSaveClick();
+  }
 };
 
-//  помещения обработчиков в переменные
-var onPopupOpenClic = getClickHandler(openPopup);
-var onPopupOpenPressEnter = getKeydownHandler(ENTER_KEYCODE, openPopup);
-var onPopupEscClic = getClickHandler(closePopup);
-var onPopupPressEsc = getKeydownHandler(ESC_KEYCODE, closePopup);
-var onPopupEscPressEnter = getKeydownHandler(ENTER_KEYCODE, closePopup);
-var onSetupSaveClick = getClickHandler(closePopup);
-var onSetupSavePressEnter = getKeydownHandler(ENTER_KEYCODE, closePopup);
-var onEyesClick = getClickHandler(changeEyesColor);
-var onCoatClick = getClickHandler(changeCoatColor);
-var onFireballClick = getClickHandler(changeFireballColor);
+//  обработчик для клика на кнопку открытия меню настроек
+var onPopupOpenClic = function () {
+  window.elements.wizardSetupMenu.classList.remove('hidden');
+  window.elements.wizardSetupSimilar.classList.remove('hidden');
 
-//  добавление фрагмента с волшебниками
-similarListElement.appendChild(fragment);
+  document.addEventListener('keydown', onPopupPressEsc);
+
+  window.elements.wizardSetupClose.addEventListener('click', onPopupEscClic);
+  window.elements.wizardSetupClose.addEventListener('keydown', onPopupEscPressEnter);
+
+  window.elements.wizardSetupSave.addEventListener('click', onSetupSaveClick);
+  window.elements.wizardSetupSave.addEventListener('keydown', onSetupSavePressEnter);
+
+  window.elements.wizardNameInput.addEventListener('input', onInputName);
+  window.elements.wizardNameInput.addEventListener('focus', function () {
+    document.removeEventListener('keydown', onPopupPressEsc);
+  });
+  window.elements.wizardNameInput.addEventListener('blur', function () {
+    document.addEventListener('keydown', onPopupPressEsc);
+  });
+
+  window.elements.wizardEyes.addEventListener('click', onEyesClick);
+  window.elements.wizardCoat.addEventListener('click', onCoatClick);
+  window.elements.wizardFireball.addEventListener('click', onFireballClick);
+};
+
+
+//  действия при закрытии меню настроек
+var closeSetupMenu = function () {
+  window.elements.wizardSetupMenu.classList.add('hidden');
+
+  document.removeEventListener('keydown', onPopupPressEsc);
+
+  window.elements.wizardSetupClose.removeEventListener('click', onPopupEscClic);
+  window.elements.wizardSetupClose.removeEventListener('keydown', onPopupEscPressEnter);
+
+  window.elements.wizardSetupSave.removeEventListener('click', onSetupSaveClick);
+  window.elements.wizardSetupSave.removeEventListener('keydown', onSetupSavePressEnter);
+
+  window.elements.wizardNameInput.removeEventListener('input', onInputName);
+  window.elements.wizardNameInput.removeEventListener('focus', function () {
+    document.removeEventListener('keydown', onPopupPressEsc);
+  });
+  window.elements.wizardNameInput.removeEventListener('blur', function () {
+    document.addEventListener('keydown', onPopupPressEsc);
+  });
+  window.elements.wizardEyes.removeEventListener('click', onEyesClick);
+  window.elements.wizardCoat.removeEventListener('click', onCoatClick);
+  window.elements.wizardFireball.removeEventListener('click', onFireballClick);
+  window.elements.wizardSetupOpen.addEventListener('click', onPopupOpenClic);
+  window.elements.wizardSetupOpen.addEventListener('keydown', onPopupOpenPressEnter);
+};
+
+//  обработчик на клик по кнопке ESC меню настроек
+var onPopupEscClic = function () {
+  closeSetupMenu();
+  window.elements.wizardNameInput.value = wizardInitial.name;
+  window.elements.wizardNameInput.setAttribute('value', wizardInitial.name);
+  window.elements.wizardEyesInput.value = wizardInitial.eyesColor;
+  window.elements.wizardCoatInput.value = wizardInitial.coatColor;
+  window.elements.wizardFireballInput.value = wizardInitial.fireballColor;
+
+  wizardCurrent.name = wizardInitial.name;
+  wizardCurrent.eyesColor = wizardInitial.eyesColor;
+  wizardCurrent.coatColor = wizardInitial.coatColor;
+  wizardCurrent.fireballColor = wizardInitial.fireballColor;
+
+  window.elements.wizardEyes.style.fill = wizardInitial.eyesColor;
+  window.elements.wizardCoat.style.fill = wizardInitial.coatColor;
+  window.elements.wizardFireball.style.backgroundColor = wizardInitial.fireballColor;
+};
+
+//  обработчик на нажатие кнопки ENTER на сокусированной кнопке открытия меню настроек
+var onPopupOpenPressEnter = function (evt) {
+  if (evt.keyCode === window.settings.KEY_CODE.ENTER) {
+    onPopupEscClic();
+  }
+};
+
+//  обработчик на нажатие кнопки ESC при открытом меню настроек
+var onPopupPressEsc = function (evt) {
+  if (evt.keyCode === window.settings.KEY_CODE.ESC) {
+    onPopupEscClic();
+  }
+};
+
+//  обработчик на нажатие кнопки ENTER на сокусированной кнопке закрытия меню настроек
+var onPopupEscPressEnter = function (evt) {
+  if (evt.keyCode === window.settings.KEY_CODE.ENTER) {
+    onPopupEscClic();
+  }
+};
 
 //  создание отслеживания событий для открытия меню настроек
-setEventsListener(wizardSetupOpen, 'add', [
-  ['click', onPopupOpenClic],
-  ['keydown', onPopupOpenPressEnter]
-]);
+window.elements.wizardSetupOpen.addEventListener('click', onPopupOpenClic);
+window.elements.wizardSetupOpen.addEventListener('keydown', onPopupOpenPressEnter);
