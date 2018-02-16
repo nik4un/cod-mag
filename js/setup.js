@@ -78,6 +78,44 @@ var onSetupSaveClick = function () {
   closeSetupMenu();
 };
 
+var onMouseDownAvatar = function (evt) {
+  if (evt.target === window.elements.dialogHandle) {
+    evt.preventDefault();
+  }
+
+  var hasShifted = false;
+
+  var mousePositionInMenu = {
+    left: evt.clientX - window.elements.wizardSetupMenu.offsetLeft,
+    top: evt.clientY - window.elements.wizardSetupMenu.offsetTop
+  };
+
+  var onMouseMove = function (moveEvt) {
+    moveEvt.preventDefault();
+    hasShifted = true;
+
+    window.elements.wizardSetupMenu.style.left =
+      (moveEvt.clientX - mousePositionInMenu.left) + 'px';
+    window.elements.wizardSetupMenu.style.top =
+      (moveEvt.clientY - mousePositionInMenu.top) + 'px';
+  };
+
+  var onMouseUp = function (upEvt) {
+    upEvt.preventDefault();
+
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+
+    if (!hasShifted) {
+      window.elements.dialogAvatarInput.click();
+    }
+  };
+
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup', onMouseUp);
+};
+
+
 var onSetupSavePressEnter = function (evt) {
   if (evt.keyCode === window.settings.KEY_CODE.ENTER) {
     onSetupSaveClick();
@@ -88,6 +126,9 @@ var onSetupSavePressEnter = function (evt) {
 var onPopupOpenClic = function () {
   window.elements.wizardSetupMenu.classList.remove('hidden');
   window.elements.wizardSetupSimilar.classList.remove('hidden');
+
+  window.elements.dialogAvatarInput.style.zIndex = '-1';
+  window.elements.dialogHandle.addEventListener('mousedown', onMouseDownAvatar);
 
   document.addEventListener('keydown', onPopupPressEsc);
 
@@ -135,6 +176,9 @@ var closeSetupMenu = function () {
   window.elements.wizardFireball.removeEventListener('click', onFireballClick);
   window.elements.wizardSetupOpen.addEventListener('click', onPopupOpenClic);
   window.elements.wizardSetupOpen.addEventListener('keydown', onPopupOpenPressEnter);
+
+  window.elements.wizardSetupMenu.style = false;
+  window.elements.dialogHandle.removeEventListener('mousedown', onMouseDownAvatar);
 };
 
 //  обработчик на клик по кнопке ESC меню настроек

@@ -21,5 +21,9 @@ var wizardSetup = wizardSetupMenu.querySelector('.setup-player');
     wizardCoatInput: wizardSetup.querySelector('input[name="coat-color"]'),
     wizardEyesInput: wizardSetup.querySelector('input[name="eyes-color"]'),
     wizardFireballInput: wizardSetup.querySelector('input[name="fireball-color"]'),
+    dialogHandle: document.querySelector('.setup-user-pic'),
+    dialogAvatarInput: wizardSetupMenu.querySelector('input[name = "avatar"]'),
+    artifactsShop: wizardSetupMenu.querySelector('.setup-artifacts-shop'),
+    artifactsBag: wizardSetupMenu.querySelector('.setup-artifacts'),
   };
 })();
