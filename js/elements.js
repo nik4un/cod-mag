@@ -10,6 +10,7 @@ var wizardSetup = wizardSetupMenu.querySelector('.setup-player');
         .content.querySelector('.setup-similar-item'),
     wizardSetupOpen: document.querySelector('.setup-open'),
     wizardSetupClose: wizardSetupMenu.querySelector('.setup-close'),
+    wizardSetupForm: wizardSetupMenu.querySelector('.setup-wizard-form'),
     wizardSetupSimilar: wizardSetupMenu.querySelector('.setup-similar'),
     wizardSetupSave: wizardSetupMenu.querySelector('.setup-submit'),
     wizardNameInput: wizardSetupMenu.querySelector('.setup-user-name'),

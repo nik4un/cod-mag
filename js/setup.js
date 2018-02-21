@@ -30,17 +30,13 @@ var changeElementOnNext = function (element, source) {
 
 //  обработчик для ввода имени в поле ввода
 var onInputName = function (evt) {
-  window.elements.wizardSetupSave.removeEventListener('click', onSetupSaveClick);
-  window.elements.wizardSetupSave.removeEventListener('keydown', onSetupSavePressEnter);
 
   if (evt.target.value.length === 0) {
     evt.target.setCustomValidity(window.settings.MESSAGE.MISSING_RU);
   } else if (evt.target.value.length < 2) {
     evt.target.setCustomValidity(window.settings.MESSAGE.TOOSHORT_RU);
   } else {
-    evt.target.setCustomValidity('');
-    window.elements.wizardSetupSave.addEventListener('click', onSetupSaveClick);
-    window.elements.wizardSetupSave.addEventListener('keydown', onSetupSavePressEnter);
+    evt.target.setCustomValidity('');;
   }
 };
 
@@ -68,16 +64,33 @@ var onFireballClick = function () {
   window.elements.wizardFireball.style.backgroundColor = wizardCurrent.fireballColor;
 };
 
-//  обработчик для клика на кнопку «Сохранить» меню настроек
-var onSetupSaveClick = function () {
+//  обработчик на успешную отправку данных формы
+var onSuccessSubmit = function () {
+  window.message.show(
+      'Успех',
+      'Ваш волшебник успешно добавлен в базу',
+      window.message.color.SUCCESS
+  );
+  closeSetupMenu();
+};
+
+//  обработчик на возникновение ошибки при  отправке данных формы
+var onErrorSubmit = function (error) {
+  window.message.show('Ошибка!', error, window.message.color.ERROR);
+};
+
+//  обработчик на отправку данных формы
+var onSubmitForm = function (evt) {
   wizardInitial.name = window.elements.wizardNameInput.value;
   window.elements.wizardNameInput.setAttribute('value', wizardInitial.name);
   wizardInitial.eyesColor = window.elements.wizardEyesInput.value;
   wizardInitial.coatColor = window.elements.wizardCoatInput.value;
   wizardInitial.fireballColor = window.elements.wizardFireballInput.value;
-  closeSetupMenu();
+  window.backend.save(new FormData(window.elements.wizardSetupForm), onSuccessSubmit, onErrorSubmit);
+  evt.preventDefault();
 };
 
+//  обработчик на нажатие кнопки мыши на аватаре меню настроек
 var onMouseDownAvatar = function (evt) {
   if (evt.target === window.elements.dialogHandle) {
     evt.preventDefault();
@@ -90,6 +103,7 @@ var onMouseDownAvatar = function (evt) {
     top: evt.clientY - window.elements.wizardSetupMenu.offsetTop
   };
 
+  //  обработчик перемещения меню настроек в окне браузера
   var onMouseMove = function (moveEvt) {
     moveEvt.preventDefault();
     hasShifted = true;
@@ -100,6 +114,7 @@ var onMouseDownAvatar = function (evt) {
       (moveEvt.clientY - mousePositionInMenu.top) + 'px';
   };
 
+  //  обработчик на отпускание кнопки мыши на аватаре меню настроек
   var onMouseUp = function (upEvt) {
     upEvt.preventDefault();
 
@@ -115,17 +130,10 @@ var onMouseDownAvatar = function (evt) {
   document.addEventListener('mouseup', onMouseUp);
 };
 
-
-var onSetupSavePressEnter = function (evt) {
-  if (evt.keyCode === window.settings.KEY_CODE.ENTER) {
-    onSetupSaveClick();
-  }
-};
-
 //  обработчик для клика на кнопку открытия меню настроек
 var onPopupOpenClic = function () {
   window.elements.wizardSetupMenu.classList.remove('hidden');
-  window.elements.wizardSetupSimilar.classList.remove('hidden');
+  window.loadWizards();
 
   window.elements.dialogAvatarInput.style.zIndex = '-1';
   window.elements.dialogHandle.addEventListener('mousedown', onMouseDownAvatar);
@@ -135,8 +143,7 @@ var onPopupOpenClic = function () {
   window.elements.wizardSetupClose.addEventListener('click', onPopupEscClic);
   window.elements.wizardSetupClose.addEventListener('keydown', onPopupEscPressEnter);
 
-  window.elements.wizardSetupSave.addEventListener('click', onSetupSaveClick);
-  window.elements.wizardSetupSave.addEventListener('keydown', onSetupSavePressEnter);
+  window.elements.wizardSetupForm.addEventListener('submit', onSubmitForm);
 
   window.elements.wizardNameInput.addEventListener('input', onInputName);
   window.elements.wizardNameInput.addEventListener('focus', function () {
@@ -161,8 +168,7 @@ var closeSetupMenu = function () {
   window.elements.wizardSetupClose.removeEventListener('click', onPopupEscClic);
   window.elements.wizardSetupClose.removeEventListener('keydown', onPopupEscPressEnter);
 
-  window.elements.wizardSetupSave.removeEventListener('click', onSetupSaveClick);
-  window.elements.wizardSetupSave.removeEventListener('keydown', onSetupSavePressEnter);
+  window.elements.wizardSetupForm.removeEventListener('submit', onSubmitForm);
 
   window.elements.wizardNameInput.removeEventListener('input', onInputName);
   window.elements.wizardNameInput.removeEventListener('focus', function () {
