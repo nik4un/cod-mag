@@ -7,9 +7,12 @@
   window.elements.wizardSetupMenu.addEventListener('dragstart', function (evt) {
     if (evt.target.tagName.toLowerCase() === 'img') {
       draggedItem =
-        evt.target.parentElement.parentElement === window.elements.artifactsShop ?
-          evt.target.cloneNode(true) : evt.target;
-      window.elements.artifactsBag.setAttribute('style', 'outline: 2px dashed red;');
+        evt.target.parentElement.parentElement === window.elements.artifactsShop
+          ? evt.target.cloneNode(true) : evt.target;
+      window.elements.artifactsBag.setAttribute(
+          'style',
+          'outline: 2px dashed red;'
+      );
       evt.dataTransfer.setData('text/plain', evt.target.alt);
     }
   });
@@ -27,7 +30,10 @@
 
   window.elements.artifactsBag.addEventListener('drop', function (evt) {
     evt.target.style.backgroundColor = '';
-    if (evt.target.tagName.toLowerCase() === 'div' && evt.target.children.length === 0) {
+    if (
+      evt.target.tagName.toLowerCase() === 'div' &&
+      evt.target.children.length === 0
+    ) {
       evt.target.appendChild(draggedItem);
     }
     window.elements.artifactsBag.removeAttribute('style');

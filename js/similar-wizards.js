@@ -25,19 +25,43 @@
 
   var allWizards = null;
 
+  // расчет рейтинга похожести для волшебников с сервера
+  var getRank = function (wizard) {
+    var rank = 0;
+
+    if (wizard.colorCoat === window.elements.wizardCoatInput.value) {
+      rank += 2;
+    }
+    if (wizard.colorEyes === window.elements.wizardEyesInput.value) {
+      rank += 1;
+    }
+    return rank;
+  };
+
   /**
    *  формирование фрагмента DOM с похожими волшебниками из данных, полученных с сервера
    * @param  {array} wizardList [ массив объектов, описывающих волшебника ]
    */
   var getSimilarWizards = function (wizardList) {
-    var wizards = window.util.getRandomFromArray(
-        wizardList,
-        window.settings.NUMBER_OF_WISARDS
-    );
+    // сортировка волшебников по похожести
+    // и получение первых наиболее похожих в количестве NUMBER_OF_WISARDS
+    var wizards = wizardList.slice().sort(function (left, right) {
+      var rankDiff = getRank(right) - getRank(left);
+      if (rankDiff === 0) {
+        rankDiff = wizardList.indexOf(left) - wizardList.indexOf(right);
+      }
+      return rankDiff;
+    }).slice(0, window.settings.NUMBER_OF_WISARDS);
+
+    //  очистка списка похожих волшебников, если он не пустй
+    while (window.elements.similarListElement.children.length) {
+      window.elements.similarListElement.removeChild(window.elements.similarListElement.children[0]);
+    }
 
     //  создание фрагмента для заполнения похожими волшебниками
     var fragment = document.createDocumentFragment();
 
+    //  наполнение фрагмента похожими волшебниками
     wizards.forEach(function (item) {
       var wizardElement = window.elements.similarWizardTemplate.cloneNode(true);
       wizardElement.querySelector('.setup-similar-label').textContent =
@@ -46,7 +70,7 @@
       wizardElement.querySelector('.wizard-eyes').style.fill = item.colorEyes;
       fragment.appendChild(wizardElement);
     });
-    //  добавление фрагмента с волшебниками
+
     window.elements.similarListElement.appendChild(fragment);
   };
 
@@ -71,9 +95,12 @@
     window.message.show('Ошибка!', messageError, window.message.color.ERROR);
   };
 
-  window.loadWizards = function () {
+  // получение похожих волшебников, в зависимости от того, скачены они с сервера или нет
+  window.showSimilarWizards = function () {
     if (!allWizards) {
       window.backend.load(onSuccessLoad, onErrorLoad);
+    } else {
+      getSimilarWizards(allWizards);
     }
   };
 })();

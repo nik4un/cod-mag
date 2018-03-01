@@ -26,5 +26,6 @@ var wizardSetup = wizardSetupMenu.querySelector('.setup-player');
     dialogAvatarInput: wizardSetupMenu.querySelector('input[name = "avatar"]'),
     artifactsShop: wizardSetupMenu.querySelector('.setup-artifacts-shop'),
     artifactsBag: wizardSetupMenu.querySelector('.setup-artifacts'),
+    artifactsBagCells: wizardSetupMenu.querySelectorAll('.setup-artifacts .setup-artifacts-cell'),
   };
 })();
