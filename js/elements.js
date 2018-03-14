@@ -8,7 +8,7 @@ var wizardSetup = wizardSetupMenu.querySelector('.setup-player');
     similarWizardTemplate: document
         .querySelector('#similar-wizard-template')
         .content.querySelector('.setup-similar-item'),
-    wizardSetupOpen: document.querySelector('.setup-open'),
+    wizardSetupOpen: document.querySelector('.setup-open-icon'),
     wizardSetupClose: wizardSetupMenu.querySelector('.setup-close'),
     wizardSetupForm: wizardSetupMenu.querySelector('.setup-wizard-form'),
     wizardSetupSimilar: wizardSetupMenu.querySelector('.setup-similar'),

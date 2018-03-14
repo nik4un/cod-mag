@@ -8,7 +8,8 @@
     name: window.elements.wizardNameInput.value,
     eyesColor: window.elements.wizardEyesInput.value,
     coatColor: window.elements.wizardCoatInput.value,
-    fireballColor: window.elements.wizardFireballInput.value
+    fireballColor: window.elements.wizardFireballInput.value,
+    image: window.elements.wizardSetupOpen.src,
   };
 
   var artifactsBagInit;
@@ -105,6 +106,8 @@
     initialSettingsWizard.coatColor = window.elements.wizardCoatInput.value;
     initialSettingsWizard.fireballColor =
       window.elements.wizardFireballInput.value;
+    initialSettingsWizard.image = window.elements.dialogHandle.src;
+    window.elements.wizardSetupOpen.src = window.elements.dialogHandle.src;
     window.backend.save(
         new FormData(window.elements.wizardSetupForm),
         onSuccessSubmit,
@@ -115,7 +118,7 @@
 
   //  обработчик на нажатие кнопки мыши на аватаре меню настроек
   var onMouseDownAvatar = function (evt) {
-    if (evt.target === window.elements.dialogHandle) {
+    if (evt.target === window.elements.dialogAvatarInput) {
       evt.preventDefault();
     }
 
@@ -129,7 +132,10 @@
     //  обработчик перемещения меню настроек в окне браузера
     var onMouseMove = function (moveEvt) {
       moveEvt.preventDefault();
-      hasShifted = true;
+
+      if (Math.abs(moveEvt.movementX) > 1 || Math.abs(moveEvt.movementY) > 1) {
+        hasShifted = true;
+      }
 
       window.elements.wizardSetupMenu.style.left =
         moveEvt.clientX - mousePositionInMenu.left + 'px';
@@ -144,8 +150,13 @@
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
 
-      if (!hasShifted) {
-        window.elements.dialogAvatarInput.click();
+      if (hasShifted) {
+        var onClickPreventDefault = function (clickEvt) {
+          clickEvt.preventDefault();
+
+          window.elements.dialogAvatarInput.removeEventListener('click', onClickPreventDefault);
+        };
+        window.elements.dialogAvatarInput.addEventListener('click', onClickPreventDefault);
       }
     };
 
@@ -158,8 +169,7 @@
     window.elements.wizardSetupMenu.classList.remove('hidden');
     window.showSimilarWizards();
 
-    window.elements.dialogAvatarInput.style.zIndex = '-1';
-    window.elements.dialogHandle.addEventListener(
+    window.elements.dialogAvatarInput.addEventListener(
         'mousedown',
         onMouseDownAvatar
     );
@@ -253,6 +263,8 @@
     window.elements.wizardCoat.style.fill = initialSettingsWizard.coatColor;
     window.elements.wizardFireball.style.backgroundColor =
       initialSettingsWizard.fireballColor;
+
+    window.elements.dialogHandle.src = initialSettingsWizard.image;
 
     Array.from(window.elements.artifactsBagCells).forEach(function (element, index) {
       element.innerHTML = artifactsBagInit[index];
